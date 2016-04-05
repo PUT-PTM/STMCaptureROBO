@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: C:\\Users\\Alibaba\\Documents\\Android_Studio\\STMCaptureROBO\\libs\\opencv\\src\\main\\aidl\\org\\opencv\\engine\\OpenCVEngineInterface.aidl
+ * Original file: C:\\Users\\Alibaba\\Documents\\STMCaptureROBO\\STMCaptureROBO\\libs\\opencv\\src\\main\\aidl\\org\\opencv\\engine\\OpenCVEngineInterface.aidl
  */
 package org.opencv.engine;
 /**
