@@ -1,5 +1,15 @@
 package com.example.alibaba.stmcapturerobo;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.ServiceConnection;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbManager;
+import android.os.Handler;
+import android.os.IBinder;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,14 +29,17 @@ import android.widget.Toast;
 import java.lang.ref.WeakReference;
 import java.util.Set;
 
-public class Camera_Arduino_Activity extends AppCompatActivity {
+import com.felhr.usbserial.UsbSerialDevice;
+
+public class StartActivity extends AppCompatActivity {
 
     /*
-     * Notifications from UsbService will be received here.
-     */
+ * Notifications from UsbService will be received here.
+ */
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, Intent intent)
+        {
             switch (intent.getAction()) {
                 case UsbService.ACTION_USB_PERMISSION_GRANTED: // USB PERMISSION GRANTED
                     Toast.makeText(context, "USB Ready", Toast.LENGTH_SHORT).show();
@@ -46,88 +59,36 @@ public class Camera_Arduino_Activity extends AppCompatActivity {
             }
         }
     };
-    private UsbService usbService;
-    private EditText editText;
-    private MyHandler mHandler;
-    private TextView display;
-    private final ServiceConnection usbConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName arg0, IBinder arg1) {
-            usbService = ((UsbService.UsbBinder) arg1).getService();
-            usbService.setHandler(mHandler);
-        }
 
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            usbService = null;
-        }
-    };
+
+    protected Context context;
+    protected Handler mHandler;
+    protected UsbManager usbManager;
+    protected UsbDevice device;
+    protected UsbDeviceConnection connection;
+    protected UsbSerialDevice serialPort;
+    protected UsbService usbService;
+    protected boolean check_connection_bool = false;
+    protected Button up, down, right, left;
+
+
+    public StartActivity() {
+        mHandler = new MyHandler(this);
+        check_connection();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_camera__arduino);
+        setContentView(R.layout.activity_start);
         mHandler = new MyHandler(this);
-        ButtonOnClick();
-        display = (TextView)findViewById(R.id.textView);
-        display.setText("");
-
+        up = (Button) findViewById(R.id.up);
+        down = (Button) findViewById(R.id.down);
+        right = (Button)findViewById(R.id.right);
+        left = (Button)findViewById(R.id.left);
+        OnClickButton();
     }
 
-    private void ButtonOnClick()
-    {
-        Button right_button = (Button) findViewById(R.id.right);
-        Button left_button = (Button) findViewById(R.id.left);
-        Button up_button = (Button) findViewById(R.id.up);
-        Button down_button = (Button) findViewById(R.id.down);
-        if (null != right_button) right_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                    String data = "R";
-                    if (usbService != null) { // if UsbService was correctly binded, Send data
-                        display.append(data);
-                        usbService.write(data.getBytes());
-                    }else
-                        display.setText("LOG : usbService is NULL ! ");
-            }
-        });
-
-        if (null != left_button) left_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String data = "L";
-                if (usbService != null) { // if UsbService was correctly binded, Send data
-                    display.append(data);
-                    usbService.write(data.getBytes());
-                }else
-                    display.setText("LOG : usbService is NULL ! ");
-            }
-        });
-
-        if (null != up_button) up_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String data = "U";
-                if (usbService != null) { // if UsbService was correctly binded, Send data
-                    display.append(data);
-                    usbService.write(data.getBytes());
-                }else
-                    display.setText("LOG : usbService is NULL ! ");
-            }
-        });
-
-        if (null != down_button) down_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String data = "D";
-                if (usbService != null) { // if UsbService was correctly binded, Send data
-                    display.append(data);
-                    usbService.write(data.getBytes());
-                }else
-                    display.setText("LOG : usbService is NULL ! ");
-            }
-        });
-    }
     @Override
     public void onResume() {
         super.onResume();
@@ -140,6 +101,76 @@ public class Camera_Arduino_Activity extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(mUsbReceiver);
         unbindService(usbConnection);
+    }
+
+    // wysylanie komunikatu do arduino
+    void OnClickButton()
+    {
+        up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                    if (usbService != null) { // if UsbService was correctly binded, Send data
+                        String data ="1";
+                        usbService.write(data.getBytes());
+                    }
+            }
+
+        });
+
+       right.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                if (usbService != null) { // if UsbService was correctly binded, Send data
+                    String data ="2";
+                    usbService.write(data.getBytes());
+                }
+            }
+
+       });
+
+        down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (usbService != null) { // if UsbService was correctly binded, Send data
+                    String data = "3";
+                    usbService.write(data.getBytes());
+                }
+            }
+
+        });
+
+        left.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                if (usbService != null) { // if UsbService was correctly binded, Send data
+                    String data ="4";
+                    usbService.write(data.getBytes());
+                }
+            }
+
+        });
+    }
+
+    private final ServiceConnection usbConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName arg0, IBinder arg1) {
+            usbService = ((UsbService.UsbBinder) arg1).getService();
+            usbService.setHandler(mHandler);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0)
+        {
+           usbService = null;
+        }
+    };
+
+    void check_connection()
+    {
+        if(usbService!= null) check_connection_bool=true;
     }
 
     private void startService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
@@ -168,13 +199,10 @@ public class Camera_Arduino_Activity extends AppCompatActivity {
         registerReceiver(mUsbReceiver, filter);
     }
 
-    /*
-     * This handler will be passed to UsbService. Data received from serial port is displayed through this handler
-     */
     private static class MyHandler extends Handler {
-        private final WeakReference<Camera_Arduino_Activity> mActivity;
+        private final WeakReference<StartActivity> mActivity;
 
-        public MyHandler(Camera_Arduino_Activity activity) {
+        public MyHandler(StartActivity activity) {
             mActivity = new WeakReference<>(activity);
         }
 
@@ -186,10 +214,10 @@ public class Camera_Arduino_Activity extends AppCompatActivity {
                     //mActivity.get().display.append(data);
                     break;
                 case UsbService.CTS_CHANGE:
-                    Toast.makeText(mActivity.get(), "CTS_CHANGE",Toast.LENGTH_LONG).show();
+                    Toast.makeText(mActivity.get(), "CTS_CHANGE", Toast.LENGTH_LONG).show();
                     break;
                 case UsbService.DSR_CHANGE:
-                    Toast.makeText(mActivity.get(), "DSR_CHANGE",Toast.LENGTH_LONG).show();
+                    Toast.makeText(mActivity.get(), "DSR_CHANGE", Toast.LENGTH_LONG).show();
                     break;
             }
         }

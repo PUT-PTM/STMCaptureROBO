@@ -32,6 +32,8 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
+
 import com.felhr.usbserial.UsbSerialDevice;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -46,128 +48,89 @@ import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button button_usb;
-    Button button_camera;
-    ImageView tak_nie_usb;
-    ImageView tak_nie_camera;
-    ImageView przerwa_techniczna;
-    boolean bool_usb = false;
-    boolean bool_camera = false;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
+    Button start;
+    Button about;
+    Button exit;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+        start = (Button)findViewById(R.id.start);
+        about = (Button)findViewById(R.id.about_aplication);
+        exit = (Button)findViewById(R.id.exit);
     }
-
     @Override
-    protected void onStart() {
+    protected void onStart()
+    {
         super.onStart();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        button_camera = (Button) findViewById(R.id.button2);
-        button_usb = (Button) findViewById(R.id.button);
-        tak_nie_camera = (ImageView) findViewById(R.id.imageView2);
-        tak_nie_usb = (ImageView) findViewById(R.id.imageView);
-        przerwa_techniczna = (ImageView) findViewById(R.id.imageView3);
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.example.alibaba.stmcapturerobo/http/host/path")
-        );
-        AppIndex.AppIndexApi.start(client, viewAction);
-        OnClinkButton();
-
-
+        OnClickButton();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-
     }
 
-
-    protected void OnClinkButton()
-    {
-        button_usb.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (bool_usb) {
-                    bool_usb = false;
-                    tak_nie_usb.setImageDrawable(getDrawable(R.drawable.no));
-                } else {
-                    bool_usb = true;
-                    tak_nie_usb.setImageDrawable(getDrawable(R.drawable.yes));
-                    if(bool_camera) Ready();
-                }
-            }
-        });
-
-        button_camera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (bool_camera) {
-                    bool_camera = false;
-                    tak_nie_camera.setImageDrawable(getDrawable(R.drawable.no));
-                } else {
-                    bool_camera = true;
-                    tak_nie_camera.setImageDrawable(getDrawable(R.drawable.yes));
-                    if(bool_usb) Ready();
-                }
-            }
-        });
-    }
-    protected  void Ready()
-    {
-        if(bool_usb)
-            if(bool_camera)
-            {
-                Context context = getApplicationContext();
-                Intent intent = new Intent(context,Camera_Arduino_Activity.class);
-                startActivity(intent);
-            }
-
-
-
-
-
-    }
 
     @Override
     public void onStop() {
         super.onStop();
+    }
 
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.example.alibaba.stmcapturerobo/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(client, viewAction);
-        client.disconnect();
+
+    protected void OnClickButton()
+    {
+        if (null != start) {
+            start.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (checkConnection()) {
+                        Toast.makeText(getApplicationContext(), "Connection ON", Toast.LENGTH_LONG).show();
+                        Intent intent;
+                        intent = new Intent(getApplicationContext(), StartActivity.class);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Connection OFF", Toast.LENGTH_LONG).show();
+                        Intent intent;
+                        intent = new Intent(getApplicationContext(), StartActivity.class);
+                        startActivity(intent);
+
+                    }
+
+                }
+            });
+        }
+
+
+        if (null != about) about.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+
+
+            }
+        });
+
+        if (null != exit) exit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                finish();
+            }
+        });
+    }
+
+    protected  boolean checkConnection()
+    {
+        boolean result = false;
+        StartActivity startActivity = new StartActivity();
+        if(startActivity.check_connection_bool) result=true;
+        return result;
+
     }
 }
+
+
 
