@@ -1,45 +1,51 @@
 package com.example.alibaba.stmcapturerobo;
-
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.ServiceConnection;
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbDeviceConnection;
-import android.hardware.usb.UsbManager;
-import android.os.Handler;
-import android.os.IBinder;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Mat;
+import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
+import com.felhr.usbserial.UsbSerialDevice;
 import java.lang.ref.WeakReference;
 import java.util.Set;
 
-import com.felhr.usbserial.UsbSerialDevice;
+public class StartActivity extends Activity implements CvCameraViewListener2 {
+    private static final String TAG = "OCVSample::Activity";
 
-public class StartActivity extends AppCompatActivity {
+    protected Context context;
+    protected MyHandler mHandler;
+    protected UsbManager usbManager;
+    protected UsbDevice device;
+    protected UsbDeviceConnection connection;
+    protected UsbSerialDevice serialPort;
+    protected UsbService usbService;
+    protected boolean check_connection_bool = false;
+    protected Button up, down, right, left;
+    protected CameraBridgeViewBase mOpenCvCameraView;
 
-    /*
- * Notifications from UsbService will be received here.
- */
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent)
-        {
+        public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case UsbService.ACTION_USB_PERMISSION_GRANTED: // USB PERMISSION GRANTED
                     Toast.makeText(context, "USB Ready", Toast.LENGTH_SHORT).show();
@@ -59,41 +65,47 @@ public class StartActivity extends AppCompatActivity {
             }
         }
     };
-
-
-    protected Context context;
-    protected Handler mHandler;
-    protected UsbManager usbManager;
-    protected UsbDevice device;
-    protected UsbDeviceConnection connection;
-    protected UsbSerialDevice serialPort;
-    protected UsbService usbService;
-    protected boolean check_connection_bool = false;
-    protected Button up, down, right, left;
-
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS: {
+                    Log.i(TAG, "OpenCV loaded successfully");
+                    mOpenCvCameraView.enableView();
+                }
+                break;
+                default: {
+                    super.onManagerConnected(status);
+                }
+                break;
+            }
+        }
+    };
 
     public StartActivity() {
-        mHandler = new MyHandler(this);
-        check_connection();
+        Log.i(TAG, "Instantiated new " + this.getClass());
     }
 
+    /**
+     * Called when the activity is first created.
+     */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        Log.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         setContentView(R.layout.activity_start);
+
+        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.camera);
+        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+        mOpenCvCameraView.setCvCameraViewListener(this);
         mHandler = new MyHandler(this);
         up = (Button) findViewById(R.id.up);
         down = (Button) findViewById(R.id.down);
-        right = (Button)findViewById(R.id.right);
-        left = (Button)findViewById(R.id.left);
+        right = (Button) findViewById(R.id.right);
+        left = (Button) findViewById(R.id.left);
         OnClickButton();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        setFilters();  // Start listening notifications from UsbService
-        startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
     }
 
     @Override
@@ -101,34 +113,61 @@ public class StartActivity extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(mUsbReceiver);
         unbindService(usbConnection);
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
     }
 
-    // wysylanie komunikatu do arduino
-    void OnClickButton()
-    {
+    @Override
+    public void onResume() {
+        super.onResume();
+        setFilters();  // Start listening notifications from UsbService
+        startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+        } else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
+    }
+
+    public void onDestroy() {
+        super.onDestroy();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
+    }
+
+    public void onCameraViewStarted(int width, int height) {
+    }
+
+    public void onCameraViewStopped() {
+    }
+
+    public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
+        return inputFrame.rgba();
+    }
+    void OnClickButton() {
         up.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
-                    if (usbService != null) { // if UsbService was correctly binded, Send data
-                        String data ="1";
-                        usbService.write(data.getBytes());
-                    }
-            }
-
-        });
-
-       right.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 if (usbService != null) { // if UsbService was correctly binded, Send data
-                    String data ="2";
+                    String data = "1";
                     usbService.write(data.getBytes());
                 }
             }
 
-       });
+        });
+
+        right.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (usbService != null) { // if UsbService was correctly binded, Send data
+                    String data = "2";
+                    usbService.write(data.getBytes());
+                }
+            }
+
+        });
 
         down.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,10 +182,9 @@ public class StartActivity extends AppCompatActivity {
 
         left.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 if (usbService != null) { // if UsbService was correctly binded, Send data
-                    String data ="4";
+                    String data = "4";
                     usbService.write(data.getBytes());
                 }
             }
@@ -162,15 +200,13 @@ public class StartActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName arg0)
-        {
-           usbService = null;
+        public void onServiceDisconnected(ComponentName arg0) {
+            usbService = null;
         }
     };
 
-    void check_connection()
-    {
-        if(usbService!= null) check_connection_bool=true;
+    void check_connection() {
+        if (usbService != null) check_connection_bool = true;
     }
 
     private void startService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
@@ -199,7 +235,8 @@ public class StartActivity extends AppCompatActivity {
         registerReceiver(mUsbReceiver, filter);
     }
 
-    private static class MyHandler extends Handler {
+    private static class MyHandler extends android.os.Handler
+    {
         private final WeakReference<StartActivity> mActivity;
 
         public MyHandler(StartActivity activity) {
@@ -222,4 +259,8 @@ public class StartActivity extends AppCompatActivity {
             }
         }
     }
+
+
+
+
 }
