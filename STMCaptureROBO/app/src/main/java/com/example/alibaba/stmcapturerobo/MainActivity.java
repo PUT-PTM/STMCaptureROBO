@@ -85,9 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
     protected  boolean checkConnection()
     {
-        boolean result = false;
-        StartActivity startActivity = new StartActivity();
-        if(startActivity.check_connection_bool) result=true;
+        boolean result = true;
         return result;
 
     }
