@@ -1,0 +1,57 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <org.opencv.android.JavaCameraView
+        android:layout_width="fill_parent"
+        android:layout_height="299dp"
+        android:id="@+id/color_blob_detection_activity_surface_view"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_above="@+id/up" />
+
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text="down"
+        android:id="@+id/down"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="button_down"/>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+
+        android:layout_height="wrap_content"
+        android:text="left"
+        android:id="@+id/left"
+        android:layout_width="150dp"
+        android:layout_above="@+id/down"
+        android:layout_alignParentStart="true"
+        android:onClick="button_left"/>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text="right"
+        android:id="@+id/right"
+        android:layout_above="@+id/down"
+        android:layout_alignParentEnd="true"
+        android:onClick="button_right"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="up"
+        android:id="@+id/up"
+        android:layout_above="@+id/left"
+        android:layout_alignEnd="@+id/down"
+        android:layout_alignStart="@+id/down"
+        android:longClickable="false"
+        android:onClick="button_up"/>
+
+</RelativeLayout>

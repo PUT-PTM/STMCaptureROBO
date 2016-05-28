@@ -1,7 +1,8 @@
 package com.example.alibaba.stmcapturerobo;
+
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -50,12 +51,12 @@ public class MainActivity extends AppCompatActivity {
                     if (checkConnection()) {
                         Toast.makeText(getApplicationContext(), "Connection ON", Toast.LENGTH_LONG).show();
                         Intent intent;
-                        intent = new Intent(getApplicationContext(), StartActivity.class);
+                        intent = new Intent(getApplicationContext(), ColorBlobDetectionActivity.class);
                         startActivity(intent);
                     } else {
                         Toast.makeText(getApplicationContext(), "Connection OFF", Toast.LENGTH_LONG).show();
                         Intent intent;
-                        intent = new Intent(getApplicationContext(), StartActivity.class);
+                        intent = new Intent(getApplicationContext(), ColorBlobDetectionActivity.class);
                         startActivity(intent);
 
                     }
