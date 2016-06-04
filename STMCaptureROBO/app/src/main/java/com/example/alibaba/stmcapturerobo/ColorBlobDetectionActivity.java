@@ -2,7 +2,9 @@ package com.example.alibaba.stmcapturerobo;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +37,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -44,7 +47,10 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnTouchListener;
 import android.view.SurfaceView;
+import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.felhr.usbserial.UsbSerialDevice;
@@ -70,6 +76,11 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
     protected MyHandler mHandler;
     int count=0;
     String data_send="";
+    int sum_x;
+    int sum_width;
+    int cout_element=0;
+
+
     UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() { //Defining a Callback which triggers whenever data is read.
         @Override
         public void onReceivedData(byte[] arg0) {
@@ -102,13 +113,14 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
 
 
                         } else {
-                            Log.d("SERIAL", "PORT NOT OPEN");
+                           // Log.d("SERIAL", "PORT NOT OPEN");
                         }
                     } else {
-                        Log.d("SERIAL", "PORT IS NULL");
+                     //   Log.d("SERIAL", "PORT IS NULL");
                     }
                 } else {
-                    Log.d("SERIAL", "PERM NOT GRANTED");
+                  //
+                  //  Log.d("SERIAL", "PERM NOT GRANTED");
                 }
             } else if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
                 //onClickStart(startButton);
@@ -126,10 +138,8 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
         public void onManagerConnected(int status) {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
-                    Log.i(TAG, "OpenCV loaded successfully");
+             //       Log.i(TAG, "OpenCV loaded successfully");
                     mOpenCvCameraView.enableView();
-
-                    // mOpenCvCameraView.setOnTouchListener(ColorBlobDetectionActivity.this);
                 }
                 break;
                 default: {
@@ -139,20 +149,12 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
             }
         }
     };
-
     public ColorBlobDetectionActivity() {
-        Log.i(TAG, "Instantiated new " + this.getClass());
+      //  Log.i(TAG, "Instantiated new " + this.getClass());
     }
 
 
     // init
-    void init_controls() {
-        left = (Button) findViewById(R.id.left);
-        right = (Button) findViewById(R.id.right);
-        up = (Button) findViewById(R.id.up);
-        down = (Button) findViewById(R.id.down);
-    }
-
     void init_USB_object() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_USB_PERMISSION);
@@ -161,7 +163,6 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
         registerReceiver(broadcastReceiver, filter);
 
     }
-
     public void start_connection() {
 
         HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
@@ -202,7 +203,6 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
         CONTOUR_COLOR = new Scalar(255, 0, 0, 255);
         find_line();
     }
-
     public void onCameraViewStopped() {
         mRgba.release();
     }
@@ -210,17 +210,11 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
 
     // extends Activity
     public void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG, "called onCreate");
+        //   Log.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         setContentView(R.layout.color_blob_detection_surface_view);
-
-        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.color_blob_detection_activity_surface_view);
-        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
-        mOpenCvCameraView.setCvCameraViewListener(this);
-
         mHandler = new MyHandler(this);
         usbManager = (UsbManager) getSystemService(this.USB_SERVICE);
         IntentFilter filter = new IntentFilter();
@@ -228,7 +222,9 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         registerReceiver(broadcastReceiver, filter);
-        init_controls();
+        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.color_blob_detection_activity_surface_view);
+        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+        mOpenCvCameraView.setCvCameraViewListener(this);
         init_USB_object();
         start_connection();
     }
@@ -238,7 +234,6 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
     }
-
     public void onResume() {
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
@@ -249,7 +244,6 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
     }
-
     public void onDestroy() {
         super.onDestroy();
         if (mOpenCvCameraView != null)
@@ -259,6 +253,7 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
 
     // find line_object
     public void find_line() {
+
         int cols = mRgba.cols();
         int rows = mRgba.rows();
 
@@ -268,7 +263,7 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
         int x = (int) 100;
         int y = (int) 100;
 
-        Log.i(TAG, "Touch image coordinates: (" + x + ", " + y + ")");
+      //  Log.i(TAG, "Touch image coordinates: (" + x + ", " + y + ")");
 
         //   if ((x < 0) || (y < 0) || (x > cols) || (y > rows)) return false;
 
@@ -281,7 +276,9 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
         touchedRect.height = (y + 4 < rows) ? y + 4 - touchedRect.y : rows - touchedRect.y;
 
         Mat touchedRegionRgba = mRgba.submat(touchedRect);
-        Log.i(TAG, touchedRegionRgba.toString());
+    //
+    //
+    //   Log.i(TAG, touchedRegionRgba.toString());
 
 
         Mat touchedRegionHsv = new Mat();
@@ -299,8 +296,8 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
         mBlobColorRgba.val[2] = 6.0;
         mBlobColorRgba.val[3] = 255.0;
 
-        Log.i(TAG, "Touched rgba color: (" + mBlobColorRgba.val[0] + ", " + mBlobColorRgba.val[1] +
-                ", " + mBlobColorRgba.val[2] + ", " + mBlobColorRgba.val[3] + ")");
+       // Log.i(TAG, "Touched rgba color: (" + mBlobColorRgba.val[0] + ", " + mBlobColorRgba.val[1] +
+          //      ", " + mBlobColorRgba.val[2] + ", " + mBlobColorRgba.val[3] + ")");
 
         mBlobColorHsv.val[0] = 6.0;
         mBlobColorHsv.val[1] = 6.0;
@@ -319,15 +316,10 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
     }
     void send_data(String send)
     {
-        if(count<5)
-        {
-            data_send=data_send+send;
-        }else
-        {
-            data_send=data_send+send;
-            serialPort.write(data_send.getBytes());
-            data_send="";
-        }
+        data_send=data_send+send;
+        Log.i(TAG,data_send);
+        data_send="";
+
     }
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
@@ -338,29 +330,40 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
             mDetector.process(mRgba);
 
             List<MatOfPoint> contours = mDetector.getContours();
-            Log.e(TAG, "Contours count: " + contours.size());
+            //
+            //  Log.e(TAG, "Contours count: " + contours.size());
             Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR);
             MatOfPoint2f approx = new MatOfPoint2f();
-            for(int i=0;i<contours.size();i++)
-            {
+            int max_2 = 0;
+            int max = 0;
+            for (int i = 0; i < contours.size(); i++) {
                 MatOfPoint2f contury2 = new MatOfPoint2f(contours.get(i).toArray());
-                double approxDis = Imgproc.arcLength(contury2,true)*0.02;
-                Imgproc.approxPolyDP(contury2,approx,approxDis,true);
+                double approxDis = Imgproc.arcLength(contury2, true) * 0.02;
+                Imgproc.approxPolyDP(contury2, approx, approxDis, true);
                 MatOfPoint points = new MatOfPoint(approx.toArray());
                 Rect rect = Imgproc.boundingRect(points);
-                //Log.i(TAG,rect.toString());
-                if(count<5)
-                {
-                    count++;
-                    send_data(new Integer(rect.x).toString() + "$" + new Integer(rect.width).toString() + "#");
-                }else
-                {
-                    count=1;
-                    send_data(new Integer(rect.x).toString()+new Integer(rect.width).toString());
+                if (max < rect.width) {
+                    max_2 = rect.x;
                 }
             }
 
+            if (contours.size() != 0) {
 
+                if (cout_element < 9)
+                {
+                    cout_element++;
+                    sum_x += max_2;
+                }
+                else
+                {
+                    cout_element = 0;
+                    sum_x += max_2;
+                    sum_x = sum_x / 10;
+                    send_data(new Integer(sum_x).toString());
+                    sum_x = 0;
+                }
+
+            }
         }
         Mat colorLabel = mRgba.submat(4, 68, 4, 68);
         colorLabel.setTo(mBlobColorRgba);
@@ -378,10 +381,6 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
 
         return new Scalar(pointMatRgba.get(0, 0));
     }
-
-
-
-
     private static class MyHandler extends android.os.Handler {
         private final WeakReference<ColorBlobDetectionActivity> mActivity;
 
@@ -394,7 +393,6 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
             switch (msg.what) {
                 case UsbService.MESSAGE_FROM_SERIAL_PORT:
                     String data = (String) msg.obj;
-                    //mActivity.get().display.append(data);
                     break;
                 case UsbService.CTS_CHANGE:
                     Toast.makeText(mActivity.get(), "CTS_CHANGE", Toast.LENGTH_LONG).show();
@@ -408,31 +406,5 @@ public class ColorBlobDetectionActivity extends Activity implements  CvCameraVie
 
 
 
-
-    //button
-
-   public void button_up(View v)
-    {
-        String data = "1";
-        serialPort.write(data.getBytes());
-    }
-    public void button_down(View v)
-    {
-        String data = "2";
-        serialPort.write(data.getBytes());
-    }
-    public void button_left(View v)
-    {
-        String data = "3";
-        serialPort.write(data.getBytes());
-    }
-    public void  button_right(View v)
-    {
-        String data = "4";
-        serialPort.write(data.getBytes());
-    }
-
-
-    //x$width#x$width#x$width#x$width#x$width#
-
 }
+
