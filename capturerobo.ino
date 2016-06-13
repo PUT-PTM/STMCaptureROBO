@@ -1,6 +1,7 @@
 //1.robot reaguje na zmiane polozenia lini wzgledem kamery zbyt szybko przez co gubi trase
 //2.wychwytuje niepotrzebne lementy
 //3. zmienilem wspolrzedne dla ktorych robot jedzie prosto
+//4. usunalem prace ciagla silnikow, robot porusz sie "kroczkami", wykonuje proste luki przy dobrym oswietleniu
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,13 +39,13 @@
 } 
     void foreword()
     {    
-        // for(int i=0;i<20;i++){
-    int value = 175; //oblsuga silnika
+         for(int i=0;i<5000;i++){
+    int value = 255; //oblsuga silnika
     digitalWrite(M1,  LOW);   
     digitalWrite(M2, HIGH);       
     analogWrite(E1, value);   //PWM Speed Control
     analogWrite(E2, value);
- //}  
+ }  
 }
     
     
@@ -62,34 +63,35 @@
     
      void turnright()
     {
-     //  for(int i=0;i<20;i++){
-  int value = 195; //oblsuga silnika
+       for(int i=0;i<5000;i++){
+  int value = 240; //oblsuga silnika
     digitalWrite(M1, LOW);   
     digitalWrite(M2, HIGH);       
-    analogWrite(E1, 50);   //PWM Speed Control
-    analogWrite(E2, value);
- //}  
+    analogWrite(E1, value);   //PWM Speed Control
+    analogWrite(E2, 0);
+ }  
     }
     
      
       void turnleft()
     {    
-  int value = 195; //oblsuga silnika
+       for(int i=0;i<5000;i++){
+  int value = 240; //oblsuga silnika
     digitalWrite(M1, LOW);   
     digitalWrite(M2, HIGH);       
-    analogWrite(E1, value);   //PWM Speed Control
-    analogWrite(E2, 50);
-// }      
+    analogWrite(E1, 0);   //PWM Speed Control
+    analogWrite(E2, value);
+ }      
     }
     
          void stop()
     {    
- 
+  for(int i=0;i<100;i++){
     digitalWrite(M1, LOW);   
     digitalWrite(M2, HIGH);       
     analogWrite(E1, 0);   //PWM Speed Control
     analogWrite(E2, 0);
-// }      
+}      
     }
     
     
@@ -196,18 +198,19 @@
       
     case 350 ... 500:
     foreword();
+    stop();
     break;  
 
     case 1 ... 349:
     turnleft();
+    stop();
     break;  
 
     case 501 ... 1024:
     turnright();
+    stop();
     break;  
 
-    default:
-    stop();
     
   }
   
