@@ -1,5 +1,6 @@
 //1.robot reaguje na zmiane polozenia lini wzgledem kamery zbyt szybko przez co gubi trase
 //2.wychwytuje niepotrzebne lementy
+//3. zmienilem wspolrzedne dla ktorych robot jedzie prosto
 
 
 #include <stdio.h>
@@ -194,15 +195,15 @@
     break;
     */
     	
-    case 300 ... 550:
+    case 350 ... 500:
     foreword();
     break;	
 
-    case 1 ... 299:
+    case 1 ... 349:
     turnleft();
     break;  
 
-    case 551 ... 1024:
+    case 501 ... 1024:
     turnright();
     break;  
 
