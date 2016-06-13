@@ -1,10 +1,14 @@
+//1.robot reaguje na zmiane polozenia lini wzgledem kamery zbyt szybko przez co gubi trase
+//2.wychwytuje niepotrzebne lementy
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <setjmp.h>
 #include <Thread.h>
 
-#define TRY do{ jmp_buf ex_buf__; if( !setjmp(ex_buf__) ){
+#define TRY do{ jmp_buf ex_buf__; if( !setjmp(ex_buf__) ){ //obsluga bledow, mozliwe ze bedziemy uzywac
 #define CATCH } else {
 #define ETRY } }while(0)
 #define THROW longjmp(ex_buf__, 1)
