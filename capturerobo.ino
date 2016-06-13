@@ -2,7 +2,6 @@
 //2.wychwytuje niepotrzebne lementy
 //3. zmienilem wspolrzedne dla ktorych robot jedzie prosto
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,8 +31,8 @@
     
    void check_line()
 {
-	
-	
+  
+  
 
 
 } 
@@ -64,10 +63,10 @@
      void turnright()
     {
      //  for(int i=0;i<20;i++){
-  int value = 200; //oblsuga silnika
+  int value = 195; //oblsuga silnika
     digitalWrite(M1, LOW);   
     digitalWrite(M2, HIGH);       
-    analogWrite(E1, 0);   //PWM Speed Control
+    analogWrite(E1, 50);   //PWM Speed Control
     analogWrite(E2, value);
  //}  
     }
@@ -75,11 +74,11 @@
      
       void turnleft()
     {    
-  int value = 200; //oblsuga silnika
+  int value = 195; //oblsuga silnika
     digitalWrite(M1, LOW);   
     digitalWrite(M2, HIGH);       
     analogWrite(E1, value);   //PWM Speed Control
-    analogWrite(E2, 0);
+    analogWrite(E2, 50);
 // }      
     }
     
@@ -153,7 +152,7 @@
       pinMode(M1, OUTPUT);   
       pinMode(M2, OUTPUT); 
       
-      myThread.onRun(sonar);
+    //  myThread.onRun(sonar);
     //  myThread.setInterval(500);
      
     }
@@ -161,8 +160,8 @@
     void loop()
     { 
       
-       if(myThread.shouldRun())
-		myThread.run();
+   //    if(myThread.shouldRun())
+   // myThread.run();
    String c;
      
       c = Serial.readString();
@@ -194,10 +193,10 @@
     stop();
     break;
     */
-    	
+      
     case 350 ... 500:
     foreword();
-    break;	
+    break;  
 
     case 1 ... 349:
     turnleft();
@@ -216,4 +215,3 @@
  //   }
     
     }
-    
