@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <setjmp.h>
 #include <Thread.h>
 
@@ -29,17 +31,13 @@
 	
 
 
-
-
-
-
 } 
     void foreword()
     {    
         // for(int i=0;i<20;i++){
-    int value = 255; //oblsuga silnika
-    digitalWrite(M1, HIGH);   
-    digitalWrite(M2, LOW);       
+    int value = 175; //oblsuga silnika
+    digitalWrite(M1,  LOW);   
+    digitalWrite(M2, HIGH);       
     analogWrite(E1, value);   //PWM Speed Control
     analogWrite(E2, value);
  //}  
@@ -49,9 +47,9 @@
      void backword()
     {
          // for(int i=0;i<20;i++){
-  int value = 255; //oblsuga silnika
-    digitalWrite(M1, LOW);   
-    digitalWrite(M2, HIGH);       
+  int value = 200; //oblsuga silnika
+    digitalWrite(M1, HIGH);   
+    digitalWrite(M2, LOW);       
     analogWrite(E1, value);   //PWM Speed Control
     analogWrite(E2, value);
 // } 
@@ -61,9 +59,9 @@
      void turnright()
     {
      //  for(int i=0;i<20;i++){
-  int value = 255; //oblsuga silnika
-    digitalWrite(M1, HIGH);   
-    digitalWrite(M2, LOW);       
+  int value = 200; //oblsuga silnika
+    digitalWrite(M1, LOW);   
+    digitalWrite(M2, HIGH);       
     analogWrite(E1, 0);   //PWM Speed Control
     analogWrite(E2, value);
  //}  
@@ -72,7 +70,7 @@
      
       void turnleft()
     {    
-  int value = 255; //oblsuga silnika
+  int value = 200; //oblsuga silnika
     digitalWrite(M1, LOW);   
     digitalWrite(M2, HIGH);       
     analogWrite(E1, value);   //PWM Speed Control
@@ -160,52 +158,52 @@
       
        if(myThread.shouldRun())
 		myThread.run();
-        char c;
-      //    if(Serial.available())  
-//  {  
-   
-  c = Serial.read(); 
-int i=0;
-while(c[i]!='$')
-{
-message[i] = c[i];
-i++;
-
-}	  
-int n = atoi(massage);
-
-  switch(n)
+   String c;
+     
+      c = Serial.readString();
+      Serial.write(c.toInt());
+      
+  switch(c.toInt())
   {
-    case '1':
+ /*   case 1:
     foreword();
     break;
     
     
-    case '2':
+    case 2:
     backword();
     break;
     
     
-    case '3':
+    case 3:
     turnright();
     break;
     
     
-    case '4':
+    case 4:
     turnleft();
     break;
     
     
-    case '5':
+    case 5:
     stop();
     break;
+    */
     	
-    case(x<450 && x>400):
+    case 300 ... 550:
     foreword();
-    break;		
+    break;	
+
+    case 1 ... 299:
+    turnleft();
+    break;  
+
+    case 551 ... 1024:
+    turnright();
+    break;  
 
     default:
-    check_line();
+    stop();
     
   }
   
@@ -214,4 +212,3 @@ int n = atoi(massage);
     
     }
     
-
