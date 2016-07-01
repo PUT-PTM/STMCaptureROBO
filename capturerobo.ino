@@ -106,35 +106,6 @@ void stop()
 }
 
 
-int sonar()
-{
-
-  //obsluga czujnika
-
-  // Ustawiamy TRIG w stan niski na 2us
-  digitalWrite(Trig, LOW);
-  delayMicroseconds(2);
-
-  // Ustawiamy TRIG w stan wysoki na 10us
-  digitalWrite(Trig, HIGH);
-  delayMicroseconds(10);
-
-  // Ustawiamy TRIG w stan niski - rozpoczynamy pomiar
-  digitalWrite(Trig, LOW);
-
-  // Odczytujamy czas trwania stanu wysokiego na pinie ECHO
-  EchoTime = pulseIn(Echo, HIGH);
-
-  // Obliczamy odległość
-  Distance = EchoTime / 58;
-
-  // Opóźnienie kolejnego pomiaru
-  delay(100);
-
-  return Distance;
-
-}
-
 
 
 void setup()
@@ -157,12 +128,35 @@ void setup()
 void loop()
 { 
 
-  String c;
+ 
+
+
+   // Ustawiamy TRIG w stan niski na 2us
+  digitalWrite(Trig, LOW);
+  delayMicroseconds(2);
+
+  // Ustawiamy TRIG w stan wysoki na 10us
+  digitalWrite(Trig, HIGH);
+  delayMicroseconds(10);
+
+  // Ustawiamy TRIG w stan niski - rozpoczynamy pomiar
+  digitalWrite(Trig, LOW);
+
+  // Odczytujamy czas trwania stanu wysokiego na pinie ECHO
+  EchoTime = pulseIn(Echo, HIGH);
+
+  // Obliczamy odległość
+  Distance = EchoTime / 58;
+
+   Serial.print(Distance);
+
+ String c;
 
   c = Serial.readString();
   Serial.write(c.toInt());
 
-  if(sonar()<10){
+
+  if(Distance<10){
    
   digitalWrite(M1, LOW);   
   digitalWrite(M2, HIGH);       
@@ -204,5 +198,3 @@ void loop()
     }
   }
 }
-
-
