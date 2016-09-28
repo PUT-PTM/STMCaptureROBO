@@ -167,12 +167,12 @@ void loop()
     {
 
     case 1 ... 256:
-      turnleft();
+      turnleft2();
       stop();
       break;  
 
     case 257 ...  383:
-      turnleft2();
+      turnleft();
       stop();
       break;  
 
@@ -182,12 +182,12 @@ void loop()
       break;  
 
     case 641 ... 767:
-      turnright();
+      turnright2();
       stop();
       break;  
 
     case 768 ... 1024:
-      turnright2();
+      turnright();
       stop();
       break;  
 
