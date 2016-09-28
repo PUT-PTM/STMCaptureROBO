@@ -156,10 +156,12 @@ void loop()
 
   if(Distance<10){
    
-  digitalWrite(M1, LOW);   
-  digitalWrite(M2, HIGH);       
-  analogWrite(E1, 0);   //PWM Speed Control
-  analogWrite(E2, 0);
+   backword();  
+   
+  //digitalWrite(M1, LOW);   
+  //digitalWrite(M2, HIGH);       
+  //analogWrite(E1, 0);   //PWM Speed Control
+  //analogWrite(E2, 0);
   }
   else{
 
